@@ -56,11 +56,25 @@
           <a class="nav-link" href="/auth/login">Войти</a>
         </li>
         @endguest
+        <div class='d-flex justify-end'>
+
         @auth
+            <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-expanded="false">
+                            Уведомления <span class="badge bg-info text-dark">
+                            {{ auth()->user()->unreadNotifications->count() }}</span>
+                  </a>
+                  <ul class="dropdown-menu">
+                  @foreach(auth()->user()->unreadNotifications as $notification)
+                       <li><a class="dropdown-item" href="/article/show/{{ $notification->data['name']['id']}}?notify={{$notification->id}}">{{ $notification->data['name']['name']}}</a></li>
+                  @endforeach
+                  </ul>
+              </li>
         <li class="nav-item">
           <a class="nav-link" href="/auth/logout">Выйти</a>
         </li>
         @endauth
+          </div>
         <!-- <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Dropdown link
@@ -81,10 +95,16 @@
   </div>
  </main>
  <footer class="bg-light text-center text-lg-start">
+   <div id="app" class="mt-3">
+      <App />
+    </div>
 
   <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
     Сергеев Михаил 211-321
   </div>
+  
+
 </footer>
+ <script src="{{ mix('js/app.js') }}"></script>
 </body>
 </html>

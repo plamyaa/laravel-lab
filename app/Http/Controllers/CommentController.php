@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Comment;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\TestMail;
 use App\Models\Article;
+use App\Jobs\VeryLongJob;
+
 
 class CommentController extends Controller
 {
@@ -54,29 +54,26 @@ class CommentController extends Controller
     {
         $request->validate([
             'title' => 'required',
-            'text' => 'required',
+            'text'=>'required',
         ]);
+        
         $comment = new Comment();
         $comment->title = request('title');
-        $comment->text = request('text');
+        $comment->text = $request->text;//запись аналогична записи сверху
         $comment->article()->associate(request('id'));
-        $comment->user()->associate(auth()->user());
         $result = $comment->save();
-        $article = Article::where('id', $comment->article_id)->first();
-        if ($request){
-            $msg = new TestMail($article, $comment);
-            Mail::send($msg);
-        }
-        return redirect()->route('show', ['id'=>request('id'), 'result'=>$result]);
+        $article = Article::FindOrFail(request('id'));
+        VeryLongJob::dispatch($article);
+        return redirect()->route('articles.show', ['article'=>request('id'), 'result'=>$result]);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Comment $comment)
     {
         //
     }
@@ -84,48 +81,48 @@ class CommentController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Comment $comment)
     {
-        $comment = Comment::FindOrFail($id);
         Gate::authorize('update-comment', $comment);
-        return view('comments.edit', ['comment' => $comment]);
+        return view('comments.edit', ['comment'=>$comment]);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Comment $comment)
     {
+        Gate::authorize('update-comment', $comment);
+
         $request->validate([
             'title' => 'required',
-            'text' => 'required',
+            'text'=>'required',
         ]);
-        $comment = Comment::FindOrFail($id);
-        Gate::authorize('update-comment', $comment);
+
         $comment->title = request('title');
         $comment->text = request('text');
         $comment->save();
-        return redirect()->route('show', ['id' => $comment->article_id]);
+       return redirect()->route('articles.show', ['article'=>$comment->article_id]);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Comment $comment)
     {
-        $comment = Comment::FindOrFail($id);
         Gate::authorize('update-comment', $comment);
         $comment->delete();
-        return redirect()->route('show', ['id' => $comment->article_id]);
+        return redirect()->route('articles.show', ['article'=>$comment->article_id]);
+
     }
 }

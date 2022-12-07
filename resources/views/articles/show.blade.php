@@ -5,18 +5,20 @@
     <h5 class="card-title">{{$article->name}}, ({{$article->date}})</h5>
     <h6 class="card-subtitle mb-2 text-muted">{{$article->shortDesc}}</h6>
     <p class="card-text">{{$article->desc}}</p>
+    @can('create')
     <a href="/article/edit/{{$article->id}}" class="btn btn-info">Редактировать</a>
     <a href="/article/destroy/{{$article->id}}" class="btn btn-warning">Удалить</a>
+    @endcan
   </div>
 
-  <h3 class="text-center">Комментарии</h3>
   @isset($_GET['result'])
-    @if($_GET['result'])
-      <div class="alert">
-        Ваш комментарий ожидает модерации!
-      </div>
-    @endif
+  @if($_GET['result'])
+  <div class="alert alert-secondary">
+    Ваш комментарий ожидает модерации!
+  </div>
+  @endif
   @endisset
+  <h3 class="text-center">Комментарии</h3>
   @foreach($comments as $comment)
   <form action="/comment/{{$comment->id}}" method="post">
     @method('DELETE')
