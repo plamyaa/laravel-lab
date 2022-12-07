@@ -63,8 +63,8 @@ class CommentController extends Controller
         $comment->article()->associate(request('id'));
         $result = $comment->save();
         $article = Article::FindOrFail(request('id'));
-        VeryLongJob::dispatch($article);
-        return redirect()->route('articles.show', ['article'=>request('id'), 'result'=>$result]);
+        VeryLongJob::dispatch($article, $comment);
+        return redirect()->route('articles.show', ['id'=>request('id'), 'result'=>$result]);
     }
 
     /**

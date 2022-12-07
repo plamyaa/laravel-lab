@@ -28,7 +28,7 @@ Route::get('/auth/logout', [AuthController::class, 'logout']);
 Route::group(['prefix'=>'/article', 'middleware'=>'auth:sanctum'], function(){
     Route::get('/create', [ArticleController::class, 'create']);
     Route::post('/store', [ArticleController::class, 'store']);
-    Route::get('/show/{id}', [ArticleController::class, 'show'])->name('show');
+    Route::get('/show/{id}', [ArticleController::class, 'show'])->name('articles.show')->middleware('path');
     Route::get('/edit/{id}', [ArticleController::class, 'edit']);
     Route::put('/{id}', [ArticleController::class, 'update']);
     Route::get('/destroy/{id}', [ArticleController::class, 'destroy']);
